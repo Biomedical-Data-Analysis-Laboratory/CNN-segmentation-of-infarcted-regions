@@ -1,0 +1,109 @@
+{
+  "EXPERIMENT": 10, # ID of the experiment (int)
+  "root_path": "...", # main path (string)
+  "dataset_path": "...", % dataset path (string)
+  # list of patients to test (if == ["ALL"] test all of them)
+  "PATIENTS_TO_TRAINVAL": ["ALL"], # (list)
+  "PATIENTS_TO_TEST": ["..."], # list of patient to exclude (list)
+  "OVERRIDE_MODELS_ID_PATH": "", # path for overriding the model ID (string)
+  "init": { # basic flag for init the process
+    "NUMBER_OF_IMAGE_PER_SECTION": 64, # change the number of image per section (optional) (int)
+    "3D": 1, # flag for the 3D dataset (optional)
+    "TF_CPP_MIN_LOG_LEVEL": "3", (string)
+    "per_process_gpu_memory_fraction": 0.5, # (int)
+    "allow_growth": 1, # (int)
+    "MULTIPROCESSING": 0 # (int)
+  },
+  # paths containing the various important folders: save, labeled_images, ...
+  "relative_paths": {
+    "labeled_images": "...", # (string)
+    "patients": "...", # (string)
+    "save": {
+      "model": "MODELS/", # (string)
+      "partial_model": "TMP_MODELS/", # (string)
+      "plot": "PLOTS/", # (string)
+      "images": "IMAGES/", # (string)
+      "text": "TEXT/", # (string)
+      "intermediate_activation": "TMP/" # (optional) folder for the intermediate activation images (string)
+    }
+  },
+  # definition of the model(s)
+  "models": [
+     {
+      "name": "PMs_segmentation", # name of nn, same as the name function (string)
+      "loss": "focal_tversky_loss", # loss name function (string)
+      "metrics": ["squared_dice_coef","tversky_coef", ...], # list of metric name functions (list)
+      "epochs": 50, # number of epochs (int)
+      "batch_size":8, # set batch size (optional, default=32) (int)
+      # validation variable
+      "val":{
+        "validation_perc": 5, # percentage (int)
+        "number_patients_for_validation": 5, % number of patients for the validation set (int)
+        "number_patients_for_testing": 4, % number of patients for the test set (int)
+        "random_validation_selection": 0 % flag for random selection in the validation dataset (int)
+      },
+      "test_steps":1, # number of test steps (int)
+      # optimizer info (different for each of them (ADAM, SGD, ...))
+      "optimizer": {
+        "name": "SGD", # (string)
+        "learning_rate": 0.01, # (int)
+        "decay": 1e-6, # (int)
+        "momentum":0.9, # (int)
+        "nesterov":"True" # (string)
+      },
+      # choseable parameters for the nn
+      "params":{
+        "dropout":{ # dropout value for layers
+          "0.1":0.25, # (int)
+          "1":0.25, # (int)
+          ...
+        },
+        "max_pool":{ # max pooling values for the particular layers
+          ...
+        }
+      },
+      # list of callbacks with choseable parameters
+      "callbacks":{
+        "ModelCheckpoint": { # save the model
+          "monitor": "mod_dice_coef", # (string)
+          "mode": "max", # (string)
+          "period": 1 # (int)
+        },
+        "EarlyStopping": { # stop the training based on parameters
+          "monitor": "loss", # (string)
+          "min_delta": 0.001, # (int)
+          "patience": 12 # (int)
+        },
+        "ReduceLROnPlateau": { # reduce learning rate
+          "monitor": "val_loss", # (string)
+          "factor": 0.1, # (int)
+          "patience": 2, # (int)
+          "min_delta": 1e-4, # (int)
+          "cooldown": 1, # (int)
+          "min_lr": 0 # (int)
+        },
+        "CollectBatchStats": { # save stats
+          "acc":"mod_dice_coef" # (string)
+        },
+        "TensorBoard": { # call tensorboard
+          "update_freq":"batch", # (string)
+          "histogram_freq": 5 # (int)
+        }
+      },
+      # (dict) containing flags to use or not other input (1=yes, 0=no) (int)
+      "moreinfo": {
+        "mip": 0,
+        "nihss": 1
+      },
+      # important flags (1=yes, 0=no) (int)
+      "to_categ":0, # select categorical output in the nn (softmax activation)
+      "save_images": 1, # save the images
+      "data_augmentation": 1, # use data augmention dataset
+      "cross_validation": 0, # use cross validation during training (save various models)
+      "train_again": 0, # train again even if the model is already saved
+      "supervised": 1, # supervised learning?
+      "save_activation_filter": 0, # save the activation filter at the end of the training
+      "use_hickle": 0 # flag to load hickle dataset instead of pickle
+    }
+  ]
+}

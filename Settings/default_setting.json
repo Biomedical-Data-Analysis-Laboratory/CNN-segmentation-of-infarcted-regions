@@ -1,0 +1,87 @@
+{
+  "EXPERIMENT": 9,
+  "root_path": "...",
+  "dataset_path": "...",
+  "PATIENTS_TO_TRAINVAL": ["ALL"],
+  "OVERRIDE_MODELS_ID_PATH": "",
+  "init": {
+    "TF_CPP_MIN_LOG_LEVEL": "3",
+    "per_process_gpu_memory_fraction": 1,
+    "allow_growth": 1,
+    "MULTIPROCESSING": 0
+  },
+  "relative_paths": {
+    "labeled_images": "...",
+    "patients": "...",
+    "save": {
+      "model": "MODELS/",
+      "partial_model": "TMP_MODELS/",
+      "plot": "PLOTS/",
+      "images": "IMAGES/",
+      "text": "TEXT/",
+      "intermediate_activation": "intermediate_activation/"
+    }
+  },
+  "models": [
+     {
+      "name": "mJNet",
+      "loss": "squared_dice_coef_loss",
+      "metrics": ["squared_dice_coef","dice_coef"],
+      "epochs": 80,
+      "batch_size": 4096,
+      "val":{
+        "validation_perc": 10,
+        "number_patients_for_validation": 0,
+        "number_patients_for_testing": 2,
+        "random_validation_selection": 0
+      },
+      "test_steps":1,
+      "optimizer": {
+        "name": "Adam",
+        "lr": 0.001,
+        "beta_1": 0.9,
+        "beta_2":0.999,
+        "epsilon":"None",
+        "decay":0.0
+      },
+      "params":{
+        "max_pool":{
+          "long.1":5,
+          "long.2":3,
+          "long.3":2
+        },
+        "dropout":{
+          "long.1":0.3,
+          "1":0.3,
+          "2":0.3,
+          "3":0.3,
+          "4":0.3,
+          "5":0.3
+        }
+      },
+      "callbacks":{
+        "ModelCheckpoint": {
+          "monitor": "val_squared_dice_coef",
+          "mode": "max",
+          "period": 1
+        },
+        "EarlyStopping": {
+          "monitor": "val_loss",
+          "min_delta": 0.00001,
+          "patience": 10
+        },
+        "CollectBatchStats": {
+          "acc":"mod_dice_coef"
+        }
+      },
+      "to_categ":0,
+      "save_images": 1,
+      "data_augmentation": 1,
+      "cross_validation": 0,
+      "train_again": 0,
+      "supervised": 1,
+      "save_activation_filter": 0,
+      "use_hickle": 0
+    }
+  ]
+}
