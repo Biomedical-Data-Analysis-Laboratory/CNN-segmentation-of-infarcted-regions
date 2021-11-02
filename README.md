@@ -23,7 +23,8 @@ in terms of both accuracy and reproducibility.
 
 ### 1.1 - Link to paper
 
-https://doi.org/10.1145/3388440.3412470
+- ACM Library : https://doi.org/10.1145/3388440.3412470
+- arxiv.org: https://arxiv.org/abs/2104.03002
 
 
 ### 2 - Dependecies:
